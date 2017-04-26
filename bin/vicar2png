@@ -82,7 +82,7 @@ def process_metadata(metadata_fd):
         if char == "'":
             if has_lquote and not has_lparen:
                 # We have a full string tag, save it.
-                tag, value = tag_buf.split("=")
+                tag, value = tag_buf.split("=",1)
                 metadata_dict[tag] = value
 
                 has_lquote = has_lparen = False
@@ -94,14 +94,14 @@ def process_metadata(metadata_fd):
             tag_buf += char
         elif char == ")":
             # We have a full parenthesized tag, save it.
-            tag, value = tag_buf.split("=")
+            tag, value = tag_buf.split("=",1)
             metadata_dict[tag] = value
 
             has_lquote = has_lparen = False
             tag_buf = ""
         elif char == " " and tag_buf and not (has_lquote or has_lparen):
             # We have a full integer or real tag, save it.
-            tag, value = tag_buf.split("=")
+            tag, value = tag_buf.split("=",1)
             metadata_dict[tag] = value
 
             has_lquote = has_lparen = False
