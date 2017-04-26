@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from __future__ import print_function
+from io import open
 import png
 import struct
 import sys
@@ -21,7 +23,7 @@ class VICARMetadata(object):
         """
         metadata: A dictionary of VICAR label/value pairs.
         """
-        for key, value in metadata.iteritems():
+        for key, value in metadata.items():
             if value.isdigit():
                 value = int(value)
             setattr(self, key.upper(), value)
@@ -37,7 +39,7 @@ def process_metadata(metadata_fd):
     # A VICAR file must start with 'LBLSIZE=<integer label size>'.
     lblsize_field = metadata_fd.read(len("LBLSIZE="))
     if lblsize_field.upper() != "LBLSIZE=":
-        print >>sys.stderr, "Malformed VICAR file: doesn't start with LBLSIZE."
+        print("Malformed VICAR file: doesn't start with LBLSIZE.", file=sys.stderr)
         exit(1)
 
     lblsize = ""
@@ -50,7 +52,8 @@ def process_metadata(metadata_fd):
     try:
         lblsize = int(lblsize)
     except ValueError:
-        print >>sys.stderr, "Malformed VICAR file: contains non-integer LBLSIZE."
+        print("Malformed VICAR file: contains non-integer LBLSIZE.",
+              file=sys.stderr)
         exit(1)
 
     # Read in the rest of the VICAR metadata.
@@ -160,9 +163,9 @@ def extract_image(vicar, image_fd):
 def write_png(outfile, pixels, vicar):
     try:
         outf = open(outfile, "wb")
-    except (IOError, OSError), e:
-        print >>sys.stderr, "Could not open", outfile, "for writing."
-        print e.message
+    except (IOError, OSError) as e:
+        print("Could not open", outfile, "for writing.", file=sys.stderr)
+        print(e.message)
         exit(1)
 
     writer = png.Writer(width=vicar.N1, height=vicar.N1 * vicar.N3,
@@ -172,19 +175,19 @@ def write_png(outfile, pixels, vicar):
 
 def process_vicar_file(infile, outfile):
     try:
-        metadata_fd = open(infile, "r")
-    except (IOError, OSError), e:
-        print >>sys.stderr, "Could not open ", infile, "to process metadata."
-        print >>sys.stderr, e.message
+        metadata_fd = open(infile, "r", encoding='latin1')
+    except (IOError, OSError) as e:
+        print("Could not open ", infile, "to process metadata.",file=sys.stderr)
+        print(e.message)
         exit(1)
 
     vicar_metadata = process_metadata(metadata_fd)
 
     try:
         image_fd = open(infile, "rb")
-    except (IOError, OSError), e:
-        print >>sys.stderr, "Could not open ", infile, "to process image."
-        print >>sys.stderr, e.message
+    except (IOError, OSError) as e:
+        print("Could not open ", infile, "to process image.", file=sys.stderr)
+        print(e.message, file=sys.stderr)
         exit(1)
 
     pixels = extract_image(vicar_metadata, image_fd)
@@ -193,7 +196,7 @@ def process_vicar_file(infile, outfile):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print >>sys.stderr, "Please provide a VICAR filename."
+        print("Please provide a VICAR filename.", file=sys.stderr)
         exit(1)
 
     infile = sys.argv[1]
